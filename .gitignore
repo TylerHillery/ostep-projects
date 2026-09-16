@@ -1,0 +1,20 @@
+# OSTEP build outputs - never commit these
+# NOTE: use full paths here, bare names like `wzip` would also ignore the `wzip/` source directory
+**/tests-out/
+initial-reverse/reverse
+initial-reverse/test.txt
+initial-reverse/test_out.txt
+initial-utilities/wcat/wcat
+initial-utilities/wgrep/wgrep
+initial-utilities/wzip/wzip
+initial-utilities/wunzip/wunzip
+processes-shell/wish
+initial-kv/kv
+*.o
+*.a
+initial-utilities/wzip/test.txt
+initial-utilities/wzip/test.z
+initial-utilities/wzip/text.z
+initial-utilities/wzip/throw
+initial-reverse/test.txt
+initial-reverse/test_out.txt
