@@ -16,5 +16,8 @@ initial-utilities/wzip/test.txt
 initial-utilities/wzip/test.z
 initial-utilities/wzip/text.z
 initial-utilities/wzip/throw
+# local xv6 work copies - keep locally, never commit whole kernel
+initial-xv6/src/
+scheduling-xv6-lottery/src/
 initial-reverse/test.txt
 initial-reverse/test_out.txt
