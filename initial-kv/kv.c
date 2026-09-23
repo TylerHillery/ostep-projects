@@ -1,5 +1,7 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum COMMANDS { CMD_PUT, CMD_GET, CMD_DELETE, CMD_CLEAR, CMD_ALL };
 
@@ -26,7 +28,7 @@ enum COMMANDS command_from_char(char c) {
 }
 
 struct put_args {
-  int value;
+  long value;
   char *key;
 };
 
@@ -44,16 +46,128 @@ struct operation {
   union operation_args args;
 };
 
-void execute(enum COMMANDS command) {
-  switch (command) {
+struct node {
+  struct node *left;
+  struct node *right;
+  char *key;
+  long value;
+};
+
+struct node *root = NULL;
+
+struct node *cmd_put(struct node *root, char *key, long value);
+struct node *cmd_get(struct node *root, char *key);
+struct node *cmd_delete(struct node *root, char *key);
+
+struct operation parse_args(char *s) {
+  char *tok = NULL;
+  char *delimeter = ",";
+  long i = 0;
+
+  struct operation op;
+
+  tok = strtok(s, delimeter);
+
+  while (tok != NULL) {
+    if (i == 0) {
+      op.command = command_from_char(tok[0]);
+    } else {
+      switch (op.command) {
+      case CMD_PUT:
+        if (i == 1) {
+          char *end;
+          long parsed;
+
+          errno = 0;
+          parsed = strtol(tok, &end, 10);
+
+          if (errno == ERANGE) {
+            fprintf(stderr, "error: '%s' is out of range\n", tok);
+            exit(EXIT_FAILURE);
+          }
+
+          if (end == tok) {
+            fprintf(stderr, "error: value '%s' is not a number\n", tok);
+            exit(EXIT_FAILURE);
+          }
+
+          if (*end != '\0') {
+            fprintf(stderr, "error: invalid number '%s'\n", tok);
+            exit(EXIT_FAILURE);
+          }
+
+          op.args.put.value = parsed;
+        } else if (i == 2) {
+          op.args.put.key = tok;
+        } else if (i > 2) {
+          fprintf(stderr, "error: too many arguments supplied put"
+                          "only takes a value and a key\n");
+          exit(EXIT_FAILURE);
+        }
+        break;
+      case CMD_GET:
+      case CMD_DELETE:
+        if (i == 1) {
+          op.args.key.key = tok;
+        } else if (i > 1) {
+          fprintf(stderr, "error: too many arguments supplied get and delete "
+                          "only take a key\n");
+          exit(EXIT_FAILURE);
+        }
+        break;
+      case CMD_CLEAR:
+      case CMD_ALL:
+        fprintf(stderr,
+                "error: command clear and all don't have any arguments\n");
+        exit(EXIT_FAILURE);
+        break;
+      }
+    }
+
+    i++;
+    tok = strtok(NULL, delimeter);
+  }
+
+  // handle if to few arguments are supplied
+  switch (op.command) {
   case CMD_PUT:
-    printf("This is the PUT command\n");
+    if (i != 3) {
+      fprintf(stderr, "error: put requires a value and key\n");
+      exit(EXIT_FAILURE);
+    }
+    break;
+
+  case CMD_GET:
+  case CMD_DELETE:
+    if (i != 2) {
+      fprintf(stderr, "error: command requires a key\n");
+      exit(EXIT_FAILURE);
+    }
+    break;
+
+  case CMD_CLEAR:
+  case CMD_ALL:
+    if (i != 1) {
+      fprintf(stderr, "error: command takes no arguments\n");
+      exit(EXIT_FAILURE);
+    }
+    break;
+  }
+
+  return op;
+}
+
+void execute(struct operation op) {
+  switch (op.command) {
+  case CMD_PUT:
+    printf("This is the PUT command - key: %s, value: %ld\n", op.args.put.key,
+           op.args.put.value);
     break;
   case CMD_GET:
-    printf("This is the GET command\n");
+    printf("This is the GET command - key: %s\n", op.args.key.key);
     break;
   case CMD_DELETE:
-    printf("This is the DELETE command\n");
+    printf("This is the DELETE command - key: %s\n", op.args.key.key);
     break;
   case CMD_CLEAR:
     printf("This is the CLEAR command\n");
@@ -80,8 +194,7 @@ int main(int argc, char *argv[]) {
   }
 
   for (int i = 1; i < argc; i++) {
-    char c = argv[i][0];
-    enum COMMANDS command = command_from_char(c);
-    execute(command);
+    struct operation op = parse_args(argv[i]);
+    execute(op);
   }
 }
