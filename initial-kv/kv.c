@@ -157,24 +157,40 @@ struct operation parse_args(char *s) {
   return op;
 }
 
-void execute(struct operation op) {
+
+/*
+ * This is stupid first attemp of in mem storage for the kv a shared struct, 
+ * that no matter the key it will set the value and get this value
+ */
+
+struct kv {
+  char key;
+  long value;
+};
+
+struct kv execute(struct operation op, struct kv db) {
   switch (op.command) {
   case CMD_PUT:
     printf("This is the PUT command - key: %s, value: %ld\n", op.args.put.key,
            op.args.put.value);
-    break;
+    db.value = op.args.put.value;
+    return db;
   case CMD_GET:
     printf("This is the GET command - key: %s\n", op.args.key.key);
-    break;
+    printf("This is current value key: %ld\n", db.value);
+    return db;
   case CMD_DELETE:
     printf("This is the DELETE command - key: %s\n", op.args.key.key);
-    break;
+    printf("NOT IMPLEMENTED YET\n");
+    return db;
   case CMD_CLEAR:
     printf("This is the CLEAR command\n");
-    break;
+    printf("NOT IMPLEMENTED YET\n");
+    return db;
   case CMD_ALL:
     printf("This is the ALL command\n");
-    break;
+    printf("NOT IMPLEMENTED YET\n");
+    return db;
   }
 }
 
@@ -184,6 +200,8 @@ int main(int argc, char *argv[]) {
   // (d = DELETE), d,key
   // (c = CLEAR), c (removes all kvs from db)
   // (a = ALL), a (prints all in any order)
+
+  struct kv db;
 
   if (argc == 1) {
     fprintf(
@@ -195,6 +213,6 @@ int main(int argc, char *argv[]) {
 
   for (int i = 1; i < argc; i++) {
     struct operation op = parse_args(argv[i]);
-    execute(op);
+    db = execute(op, db);
   }
 }
