@@ -169,6 +169,7 @@ UPROGS=\
 	_cat\
 	_echo\
 	_forktest\
+	_getpid_demo\
 	_grep\
 	_init\
 	_kill\
@@ -239,6 +240,10 @@ qemu-gdb: fs.img xv6.img .gdbinit
 
 qemu-nox-gdb: fs.img xv6.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
+	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
+
+.PHONY: qemu-vscode-gdb
+qemu-vscode-gdb: fs.img xv6.img
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
 
 # CUT HERE

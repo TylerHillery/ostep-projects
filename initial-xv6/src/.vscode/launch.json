@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug xv6 kernel",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/kernel",
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "miDebuggerArgs": "-nx",
+      "miDebuggerServerAddress": "localhost:26000",
+      "launchCompleteCommand": "None",
+      "logging": {"engineLogging": true},
+      "setupCommands": [
+        {
+          "text": "-gdb-set architecture i386"
+        }
+      ]
+    }
+  ]
+}
